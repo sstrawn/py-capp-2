@@ -34,7 +34,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: docker.io/sstrawn100/sstrawn:${{ github.sha }}
+          tags: docker.io/sstrawn100/gh3:${{ github.sha }}
           file: ./Dockerfile
           context: ./
 
@@ -58,4 +58,4 @@ jobs:
             az config set extension.use_dynamic_install=yes_without_prompt
             echo "Starting Deploying"
             az containerapp registry set -n gh3 -g sca --server docker.io/sstrawn100 --username  ${{ secrets.GH3_REGISTRY_USERNAME }} --password ${{ secrets.GH3_REGISTRY_PASSWORD }}
-            az containerapp update -n gh3 -g sca --image docker.io/sstrawn100/sstrawn:${{ github.sha }}
+            az containerapp update -n gh3 -g sca --image docker.io/sstrawn100/gh3:${{ github.sha }}
