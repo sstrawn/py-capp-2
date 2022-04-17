@@ -26,7 +26,7 @@ jobs:
       - name: Log in to container registry
         uses: docker/login-action@v1
         with:
-          registry: sstrawn.azurecr.io
+          registry: docker.io/sstrawn100
           username: ${{ secrets.GH2_REGISTRY_USERNAME }}
           password: ${{ secrets.GH2_REGISTRY_PASSWORD }}
 
@@ -34,7 +34,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: sstrawn.azurecr.io/silasstrawn:${{ github.sha }}
+          tags: docker.io/sstrawn100/sstrawn:${{ github.sha }}
           file: ./Dockerfile
           context: ./
 
@@ -57,5 +57,5 @@ jobs:
             echo "Installing containerapp extension"
             az config set extension.use_dynamic_install=yes_without_prompt
             echo "Starting Deploying"
-            az containerapp registry set -n gh2 -g sca --server sstrawn.azurecr.io --username  ${{ secrets.GH2_REGISTRY_USERNAME }} --password ${{ secrets.GH2_REGISTRY_PASSWORD }}
-            az containerapp update -n gh2 -g sca --image sstrawn.azurecr.io/silasstrawn:${{ github.sha }}
+            az containerapp registry set -n gh2 -g sca --server docker.io/sstrawn100 --username  ${{ secrets.GH2_REGISTRY_USERNAME }} --password ${{ secrets.GH2_REGISTRY_PASSWORD }}
+            az containerapp update -n gh2 -g sca --image docker.io/sstrawn100/sstrawn:${{ github.sha }}
