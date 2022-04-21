@@ -1,0 +1,62 @@
+name: Trigger auto deployment for containerapp upgh222
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ app22 ]
+    paths:
+    - '**'
+    - '.github/workflows/upgh222-AutoDeployTrigger-c49db262-4d21-47c5-92ea-cbed4fb1b99e.yml'
+
+  # Allow mannually trigger 
+  workflow_dispatch:      
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Log in to container registry
+        uses: docker/login-action@v1
+        with:
+          registry: upgh222acr5470831584907572732.azurecr.io
+          username: ${{ secrets.UPGH222_REGISTRY_USERNAME }}
+          password: ${{ secrets.UPGH222_REGISTRY_PASSWORD }}
+
+      - name: Build and push container image to registry
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: upgh222acr5470831584907572732.azurecr.io/upgh222:${{ github.sha }}
+          file: ./Dockerfile
+          context: ./
+
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.UPGH222_AZURE_CREDENTIALS }}
+
+
+      - name: Deploy to containerapp
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            echo "Installing containerapp extension"
+            az config set extension.use_dynamic_install=yes_without_prompt
+            echo "Starting Deploying"
+            az containerapp registry set -n upgh222 -g container_apps --server upgh222acr5470831584907572732.azurecr.io --username  ${{ secrets.UPGH222_REGISTRY_USERNAME }} --password ${{ secrets.UPGH222_REGISTRY_PASSWORD }}
+            az containerapp update -n upgh222 -g container_apps --image upgh222acr5470831584907572732.azurecr.io/upgh222:${{ github.sha }}
